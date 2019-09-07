@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Short Links</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<script type="text/javascript"> window.CSRF_TOKEN = "{{ csrf_token }}"; </script>
+  <script type="text/javascript">
+   $(function() {
+      $("#shorten").click(function () {
+        var url = $("#httpurl").val();
+        $.ajax({
+          url: '/api/v1/urls/',
+          type : "POST",
+          data: {
+            'url': url,
+             'csrfmiddlewaretoken': window.CSRF_TOKEN
+          },
+          dataType: 'json',
+          success: function (data) {
+            if (data) {
+              document.getElementById('green').style.display="block";
+              document.getElementById("urlid").href = data['http_url'];
+              document.getElementById("urlid").innerHTML = data['short_url'];
+            }
+            else{
+              var red = document.getElementById('red').style.display="block";
+            }
+          },
+          error : function(xhr,errmsg,err) {
+            document.getElementById('red').style.display="block";
+            document.getElementById("error").innerHTML = err
+          }
+        });
+      });
+   });
+  </script>
+
+
+</head>
+<body>
+
+<div class="container">
+  <h2>Create short links </h2>
+  <hr>
+  <form action="{% url 'urlmgmt:makeshort' %}" method="post">
+     {% csrf_token %}
+    <div class="form-group">
+      <label for="httpurl">Enter URL </label>
+      <input class="form-control" id="httpurl" type="text" placeholder="Shorten your link - http://www.facebook.com" name="httpurl" required>
+    </div>
+     <button type="button"  class="btn btn-primary" id="shorten">Shorten</button>
+  </form>
+
+  <br>
+
+
+  <div class="alert alert-success green" id="green" style="display:none">
+    <strong>Shorten URL: </strong> <a target="_blank" href="" id="urlid"> </a>
+  </div>
+
+
+  <div class="alert alert-danger red" id="red" style="display:none">
+    <strong>Error:</strong> <p id="error"> </p>
+  </div>
+
+</div>
+</body>
+</html>
